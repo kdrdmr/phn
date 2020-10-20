@@ -10,8 +10,24 @@ $numbers = ["1352120000", "5352120000", "05352120000", "+905352120000", "9053521
 $lib = PhoneNumberUtil::getInstance();
 foreach ($numbers as $number) {
     $num = $lib->parse($number, "TR");
-    echo sprintf("[%s] number country: [%s] with national: %s and int: %s isValid:%b\n",
-        $number, $num->getCountryCode(), $num->getNationalNumber(), $lib->format($num, PhoneNumberFormat::E164), (bool)$lib->isValidNumber($num));
+    $countryRegionCode = $lib->getRegionCodeForCountryCode($num->getCountryCode());
+    $regionMetadata  = $lib->getMetadataForRegion($countryRegionCode);
+    $mobile_code_pattern = $regionMetadata->getMobile()->getNationalNumberPattern();
+    $matchIsMobile = preg_match("/".$mobile_code_pattern."/", $num->getNationalNumber(), $matches);
+    echo sprintf("[%s] number country: [%s] with national: %s and int: %s isValid:%b Country: %s isMobile: %b\n",
+        $number, $num->getCountryCode(), $num->getNationalNumber(), $lib->format($num, PhoneNumberFormat::E164),
+        (bool)$lib->isValidNumber($num), $countryRegionCode , (bool)$matchIsMobile);
+    /*
+    var_export($num);
+    var_export($countryRegionCode);
+    var_export($lib->getMetadataForRegion("TR")->hasMobile());
+    var_export($lib->getMetadataForRegion($lib->getRegionCodeForCountryCode($num->getCountryCode()))->getMobile());
+    var_export($matchIsMobile);
+    var_export($matches);
+
+
+    break;
+    */
 }
 
 /**
